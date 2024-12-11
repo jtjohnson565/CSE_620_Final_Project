@@ -1,0 +1,9 @@
+Modularity: 0.27724662919620496
+Number of Communities: 9
+
+T_max: 1000
+Cooling Method: log
+Cooling Alpha: 0.99
+T_f: 100
+Min Moves: 1
+Max Moves
