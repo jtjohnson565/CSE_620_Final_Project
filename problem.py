@@ -29,19 +29,17 @@ class ModularityMaximization():
             self.tag_network = nx.from_pandas_edgelist(links_df, 'source', 'target', create_using = nx.Graph())
 
             # Add Tag and Link Attributes
-            nx.set_node_attributes(self.tag_network, {i: {'name': id_to_tag_dict[i], 'community': i, 'color': None} for i in self.tag_network.nodes}) # Initially set Vertex to its own Community
+            nx.set_node_attributes(self.tag_network, {i: {'name': id_to_tag_dict[i], 'community': i, 'sub_nodes': [i], 'color': None} for i in self.tag_network.nodes}) # Initially set Vertex to its own Community
             nx.set_edge_attributes(self.tag_network, {(links_df.at[i, 'source'], links_df.at[i, 'target']): {"weight": links_df.at[i, 'value']} for i in links_df.index})
 
             # Generate Random Colors for Each Community While Making Sure They're All Not Too Close to Each Other
-            color_dist_threshold = 40.0
             self.color_dict = {i: None for i in np.unique(list(nx.get_node_attributes(self.tag_network, 'community').values()))}
 
             for i in self.color_dict.keys():
                 while True:
                     color = np.random.choice(range(50, 256), 3)
 
-                    if len([col for col in [self.color_dict[k] for k in self.color_dict.keys() if self.color_dict[k] is not None] \
-                            if math.dist(color, col) < color_dist_threshold]) == 0:
+                    if len([col for col in [self.color_dict[k] for k in self.color_dict.keys() if self.color_dict[k] is not None] if math.dist(color, col) < 40.0]) == 0:
                         self.color_dict[i] = color
                         break
 
@@ -84,7 +82,7 @@ class ModularityMaximization():
     
     ############################################################################################################################
     # Plot the Current Instance of the Problem
-    def plot_communities(self, plot_path, color_dist_threshold = 5.0, k = 6.5, iterations = 550, seed = 389):
+    def plot_communities(self, plot_path, k = 6.5, iterations = 550, seed = 389):
         plt.figure(figsize=(75,75))
         
         pos = nx.spring_layout(self.tag_network, weight = 'weight', k = k, iterations = iterations, seed = seed)
