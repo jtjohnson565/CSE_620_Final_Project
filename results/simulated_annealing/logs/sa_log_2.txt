@@ -1,0 +1,16 @@
+plot_output_filepath: results/simulated_annealing/plots/sa_plot_2.png
+edgelist_output_filepath: results/simulated_annealing/edge_lists/sa_edges_2.csv
+
+Modularity: 0.34868839282831804
+Number of Communities Remaining: 7
+
+t_max: 1000.0
+t_final: 95.0
+cooling_method: log
+cooling_rate: 0.99
+k_max: inf
+n_min_moves: 10
+n_max_moves: 25
+resolution: 1.0
+sa_random_state: 42
+plot_random_state: 389

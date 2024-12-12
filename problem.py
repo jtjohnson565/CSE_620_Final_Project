@@ -1,4 +1,4 @@
-import os, random, copy, math
+import os, copy, math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -29,22 +29,10 @@ class ModularityMaximization():
             self.tag_network = nx.from_pandas_edgelist(links_df, 'source', 'target', create_using = nx.Graph())
 
             # Add Tag and Link Attributes
-            nx.set_node_attributes(self.tag_network, {i: {'name': id_to_tag_dict[i], 'community': i, 'sub_nodes': [i], 'color': None} for i in self.tag_network.nodes}) # Initially set Vertex to its own Community
+            nx.set_node_attributes(self.tag_network, {i: {'name': id_to_tag_dict[i], 'community': i, 'color': None} for i in self.tag_network.nodes}) # Initially set Vertex to its own Community
             nx.set_edge_attributes(self.tag_network, {(links_df.at[i, 'source'], links_df.at[i, 'target']): {"weight": links_df.at[i, 'value']} for i in links_df.index})
 
-            # Generate Random Colors for Each Community While Making Sure They're All Not Too Close to Each Other
-            self.color_dict = {i: None for i in np.unique(list(nx.get_node_attributes(self.tag_network, 'community').values()))}
-
-            for i in self.color_dict.keys():
-                while True:
-                    color = np.random.choice(range(50, 256), 3)
-
-                    if len([col for col in [self.color_dict[k] for k in self.color_dict.keys() if self.color_dict[k] is not None] if math.dist(color, col) < 40.0]) == 0:
-                        self.color_dict[i] = color
-                        break
-
-            self.color_dict = {i: colors.to_hex(self.color_dict[i] / 255) for i in self.color_dict.keys()}
-            nx.set_node_attributes(self.tag_network, self.color_dict, 'color')
+            
             
         else:
             self.tag_network = mod_max.tag_network
@@ -78,6 +66,23 @@ class ModularityMaximization():
         neighbor_network.tag_network.nodes[node_id]['color'] = self.color_dict[community_id]
 
         return ModularityMaximization(mod_max = neighbor_network)
+
+
+    ############################################################################################################################
+    # Generate Random Colors for Each Community While Making Sure They're All Not Too Close to Each Other
+    def set_community_colors(self):
+        self.color_dict = {i: None for i in np.unique(list(nx.get_node_attributes(self.tag_network, 'community').values()))}
+
+        for i in self.color_dict.keys():
+            while True:
+                color = np.random.choice(range(50, 256), 3)
+
+                if len([col for col in [self.color_dict[k] for k in self.color_dict.keys() if self.color_dict[k] is not None] if math.dist(color, col) < 40.0]) == 0:
+                    self.color_dict[i] = color
+                    break
+
+        self.color_dict = {i: colors.to_hex(self.color_dict[i] / 255) for i in self.color_dict.keys()}
+        nx.set_node_attributes(self.tag_network, self.color_dict, 'color')
     
     
     ############################################################################################################################
@@ -91,3 +96,12 @@ class ModularityMaximization():
                          node_color = nx.get_node_attributes(self.tag_network, 'color').values(), linewidths = 1, edgecolors = 'black')
         
         plt.savefig(plot_path)
+
+        
+    ############################################################################################################################
+    # Plot the Current Instance of the Problem
+    def output_edgelist(self, edgelist_output_path):
+        edgelist_dict = {i: {'source': u, 'target': v, 'weight': self.tag_network.get_edge_data(u, v)['weight'], 'source_community': self.tag_network.nodes[u]['community'], 'target_community': self.tag_network.nodes[v]['community']} \
+                         for i, (u, v) in enumerate(self.tag_network.edges)}
+        edgelist_df = pd.DataFrame.from_dict(edgelist_dict, orient = 'index', columns = ['source', 'target', 'weight', 'source_community', 'target_community'])
+        edgelist_df.to_csv(edgelist_output_path, index= False)
