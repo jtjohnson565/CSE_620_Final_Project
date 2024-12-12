@@ -134,7 +134,7 @@ if __name__ == "__main__":
     df_edges_with_communities.to_csv('results/louvain/edge_list_with_communities_Louvain.csv', index=False)
 
     G1, pos1, color_list_community1, community_num_group1, max_k_w1, modularity1, partition1 = simple_Leiden(G)
-    print(f"Leiden Modularity: {modularity}")  # Print the modularity
+    print(f"Leiden Modularity: {modularity1}")  # Print the modularity
 
     # Create a list to store the edge data
     edge_data = []
